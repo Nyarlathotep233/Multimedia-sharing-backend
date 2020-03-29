@@ -1,2 +1,2 @@
-# Multimedia-sharing-backend
- 
+# Multimedia-sharing-server
+ Multimedia-sharing-server
