@@ -11,15 +11,17 @@ var path = require("path");
 // https
 var fs = require('fs');
 var https = require('https').createServer({
-	key: fs.readFileSync('./3017312_zhangzec.vip.key'),
-	cert: fs.readFileSync('./3017312_zhangzec.vip.crt')
+  key: fs.readFileSync('./3017312_zhangzec.vip.key'),
+  cert: fs.readFileSync('./3017312_zhangzec.vip.crt')
 }, app);
 var SkyRTC = require('skyrtc').listen(https);
 var path = require("path");
 
 var port = 3000;
 
-https.listen(port);
+https.listen(port, () => {
+  console.log("app listen port in https://localhost:" + port)
+});
 // ////////////
 
 // // http
@@ -28,14 +30,12 @@ https.listen(port);
 // var path = require("path");
 
 // var port = process.env.PORT || 80;
-// http.listen(port);
+// http.listen(()=>{
+//    console.log("app listen port in http://localhost:" + port)
+// });
 // // /////////////
 
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.get('/', function (req, res) {
-  res.sendFile(__dirname + '/index.html');
-});
 
 SkyRTC.rtc.on('new_connect', function (socket) {
   console.log('创建新连接');
@@ -68,8 +68,6 @@ SkyRTC.rtc.on('answer', function (socket, answer) {
 SkyRTC.rtc.on('error', function (error) {
   console.log("发生错误：" + error.message);
 });
-console.log("app listen port in http://localhost:" + port)
-
 
 // app.use(
 //   cors({
@@ -314,6 +312,67 @@ app.get("/updateBySpider", (req, res) => {
   res.send("updating");
 })
 
-// app.listen(3000, function () {
-//   console.log("app listen port in 3000");
-// });
+app.get("/lastUpdate", (req, res) => {
+  console.log('/lastUpdate')
+  var file = path.join(__dirname, 'data/template.json')
+  fs.readFile(file, 'utf-8', function (err, data) {
+    if (err) {
+      res.send('文件读取失败')
+    } else {
+      var tData = data.toString()
+      tData = JSON.parse(tData)
+      console.log(tData.date)
+      if (tData.date) {
+        res.send({
+          date: tData.date
+        })
+      } else {
+        console.log("时间读取失败")
+        // 更新时间
+        let nowDate = Date.now()
+        fs.readFile(file, function (err, data) {
+          if (err) {
+            return console.error(err)
+          }
+          var tData = data.toString()
+          tData = JSON.parse(tData)
+          tData.date = nowDate
+          var str = JSON.stringify(tData)
+          fs.writeFile(file, str, function (err) {
+            if (err) {
+              console.error(err)
+            }
+            console.log('----------时间更新成功-------------')
+          })
+        })
+        res.send({
+          date: nowDate
+        })
+      }
+
+    }
+  })
+})
+
+// 爬虫自动更新 10小时
+setInterval(() => {
+  autospider()
+
+  let nowDate = Date.now()
+  var file = path.join(__dirname, 'data/template.json')
+  fs.readFile(file, function (err, data) {
+    if (err) {
+      return console.error(err)
+    }
+    var tData = data.toString() //将二进制的数据转换为字符串
+    tData = JSON.parse(tData) //将字符串转换为json对象
+    tData.date = nowDate
+    var str = JSON.stringify(tData) //因为nodejs的写入文件只认识字符串或者二进制数，所以把json对象转换成字符串重新写入json文件中
+    fs.writeFile(file, str, function (err) {
+      if (err) {
+        console.error(err)
+      }
+      console.log('----------时间更新成功-------------')
+    })
+  })
+}, 36000000)

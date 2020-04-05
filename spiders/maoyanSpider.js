@@ -72,7 +72,7 @@ module.exports = function (allFinish, afterGetData) {
             imgs.push(movieObj.moviePoster);
           });
           mkdir("./content", saveContent);
-          mkdir("./imgs", downloadImg);
+          // mkdir("./imgs", downloadImg);
           //说明 数据获取完毕
           if (movieArr.length > 0) {
             resolve(movieArr);
