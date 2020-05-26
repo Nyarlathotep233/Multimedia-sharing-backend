@@ -1,11 +1,11 @@
-var maoyanSpider = require("./spiders/maoyanSpider");
-var maoyanlistSpider = require("./spiders/maoyanlistSpider");
+var maoyanSpider = require("./spiders/maoyanSpider")
+var maoyanlistSpider = require("./spiders/maoyanlistSpider")
 var miguMusicSpider = require("./spiders/miguSpider")
-var pool = require("./db.js");
+var pool = require("./db.js")
 
 module.exports = () => {
-  console.log("start");
-  update();
+  console.log("start")
+  update()
 }
 
 /*var timmer = setInterval(() => {
@@ -18,25 +18,25 @@ function update() {
   // maoyan autospider
   maoyanSpider(
     function () {
-      console.log("write file end");
+      console.log("write file end")
     },
     data => {
       // console.log(data);
-      console.log("----------------save to database");
+      console.log("----------------save to database")
       data.forEach((movie, index) => {
-        imgUrl = movie.moviePoster;
-        var pos = imgUrl.indexOf("@");
-        var imgUrlresult = imgUrl.substring(0, pos);
-        var imgName = imgUrlresult.split("/").pop();
+        imgUrl = movie.moviePoster
+        var pos = imgUrl.indexOf("@")
+        var imgUrlresult = imgUrl.substring(0, pos)
+        var imgName = imgUrlresult.split("/").pop()
 
-        console.log("movieTitle", movie.movieTitle);
-        console.log("moviePoster", movie.moviePoster);
-        console.log("piclocal", imgName);
-        console.log("movieDetail", movie.movieDetail);
+        console.log("movieTitle", movie.movieTitle)
+        console.log("moviePoster", movie.moviePoster)
+        console.log("piclocal", imgName)
+        console.log("movieDetail", movie.movieDetail)
         console.log("spidermark", {
           maoyan: movie.movieLink.slice(7)
-        });
-        var addSql = '';
+        })
+        var addSql = ''
         addSql =
           `INSERT INTO movies (moviesname,moviespicurl,moviespiclocal,moviesdetail,spidermark,defaultlink) 
               SELECT '` +
@@ -56,9 +56,9 @@ function update() {
               WHERE NOT EXISTS(SELECT * FROM movies WHERE spidermark->'$.maoyan'='` +
           movie.movieLink.slice(7) +
           `')
-              ;`;
+              ;`
 
-        console.log(addSql);
+        console.log(addSql)
         var addSqlParams = [
           movie.movieTitle,
           movie.moviePoster,
@@ -67,42 +67,42 @@ function update() {
           JSON.stringify({
             maoyan: movie.movieLink.slice(7)
           })
-        ];
+        ]
         pool.query(addSql, function (err, result) {
           if (err) {
-            console.log("[INSERT ERROR] - ", err.message);
-            return;
+            console.log("[INSERT ERROR] - ", err.message)
+            return
           }
 
           console.log(
             "--------------------------INSERT----------------------------"
-          );
+          )
           //console.log('INSERT ID:',result.insertId);
-          console.log("INSERT ID:", result.insertId);
+          console.log("INSERT ID:", result.insertId)
           console.log(
             "-----------------------------------------------------------------\n\n"
-          );
+          )
           if (result.insertId == 0) {
             var selectMovieId =
               `SELECT * FROM movies WHERE spidermark->'$.maoyan'='` +
               movie.movieLink.slice(7) +
-              `'`;
+              `'`
             pool.query(selectMovieId, (err, result) => {
               if (err) {
-                console.log("[INSERT ERROR] - ", err.message);
-                return;
+                console.log("[INSERT ERROR] - ", err.message)
+                return
               }
 
               console.log(
                 "--------------------------SELECT----------------------------"
-              );
+              )
               //console.log('INSERT ID:',result.insertId);
-              var findMovieId = result[0].idmovies;
-              console.log(findMovieId);
+              var findMovieId = result[0].idmovies
+              console.log(findMovieId)
               console.log(
                 "-----------------------------------------------------------------\n\n"
-              );
-              var addLinkSql = "";
+              )
+              var addLinkSql = ""
               if (!parseFloat(movie.movieDetail)) {
                 addLinkSql =
                   `INSERT INTO moviesources (idmovies,sourceurl,sourceowner,scorefromsource) 
@@ -113,7 +113,7 @@ function update() {
                   movie.movieLink +
                   `','maoyan',` +
                   -1 +
-                  `)`;
+                  `)`
               } else {
                 addLinkSql =
                   `INSERT INTO moviesources (idmovies,sourceurl,sourceowner,scorefromsource) 
@@ -124,27 +124,27 @@ function update() {
                   movie.movieLink +
                   `','maoyan',` +
                   parseFloat(movie.movieDetail) +
-                  `)`;
+                  `)`
               }
               pool.query(addLinkSql, addLinkSql, (err, result) => {
                 if (err) {
-                  console.log("[INSERT ERROR] - ", err.message);
-                  return;
+                  console.log("[INSERT ERROR] - ", err.message)
+                  return
                 }
                 console.log(
                   "--------------------------INSERT----------------------------"
-                );
+                )
                 console.log(
                   "INSERT URL:",
                   "https://maoyan.com" + movie.movieLink
-                );
+                )
                 console.log(
                   "-----------------------------------------------------------------\n\n"
-                );
-              });
-            });
+                )
+              })
+            })
           } else {
-            var addLinkSql = "";
+            var addLinkSql = ""
             if (!parseFloat(movie.movieDetail)) {
               addLinkSql =
                 `INSERT INTO moviesources (idmovies,sourceurl,sourceowner,scorefromsource) 
@@ -155,7 +155,7 @@ function update() {
                 movie.movieLink +
                 `','maoyan',` +
                 -1 +
-                `)`;
+                `)`
             } else {
               addLinkSql =
                 `INSERT INTO moviesources (idmovies,sourceurl,sourceowner,scorefromsource) 
@@ -166,40 +166,40 @@ function update() {
                 movie.movieLink +
                 `','maoyan',` +
                 parseFloat(movie.movieDetail) +
-                `)`;
+                `)`
             }
             pool.query(addLinkSql, addLinkSql, (err, result) => {
               if (err) {
-                console.log("[INSERT ERROR] - ", err.message);
-                return;
+                console.log("[INSERT ERROR] - ", err.message)
+                return
               }
               console.log(
                 "--------------------------INSERT----------------------------"
-              );
-              console.log("INSERT URL:", "https://maoyan.com" + movie.movieLink);
+              )
+              console.log("INSERT URL:", "https://maoyan.com" + movie.movieLink)
               console.log(
                 "-----------------------------------------------------------------\n\n"
-              );
-            });
+              )
+            })
           }
-        });
-      });
+        })
+      })
     }
-  );
+  )
 
   // maoyanlist autospider
   maoyanlistSpider((err, rankingBoxArr, mostExceptArr, top100Arr) => {
     if (err) {
-      console.log(err);
-      return;
+      console.log(err)
+      return
     }
     console.log(rankingBoxArr)
     console.log(mostExceptArr)
     console.log(top100Arr)
     pool.query('truncate multimediasharing.moviesrankinglist;', (err, ret) => {
       if (err) {
-        console.log("[DELETE ERROR] - ", err.message);
-        return;
+        console.log("[DELETE ERROR] - ", err.message)
+        return
       }
       rankingBoxArr.forEach((movie, index) => {
         var selectListSql = `
@@ -208,17 +208,17 @@ function update() {
         `
         pool.query(selectListSql, (err, ret) => {
           if (err) {
-            console.log("[INSERT ERROR] - ", err.message);
-            return;
+            console.log("[INSERT ERROR] - ", err.message)
+            return
           }
           console.log(
             "--------------------------INSERT----------------------------"
-          );
-          console.log("INSERT URL:", "https://maoyan.com" + movie.movieLink);
-          console.log("INSERT Title:", movie.movieTitle);
+          )
+          console.log("INSERT URL:", "https://maoyan.com" + movie.movieLink)
+          console.log("INSERT Title:", movie.movieTitle)
           console.log(
             "-----------------------------------------------------------------\n\n"
-          );
+          )
         })
       })
       mostExceptArr.forEach((movie, index) => {
@@ -228,17 +228,17 @@ function update() {
         `
         pool.query(selectListSql, (err, ret) => {
           if (err) {
-            console.log("[INSERT ERROR] - ", err.message);
-            return;
+            console.log("[INSERT ERROR] - ", err.message)
+            return
           }
           console.log(
             "--------------------------INSERT----------------------------"
-          );
-          console.log("INSERT URL:", "https://maoyan.com" + movie.movieLink);
-          console.log("INSERT Title:", movie.movieTitle);
+          )
+          console.log("INSERT URL:", "https://maoyan.com" + movie.movieLink)
+          console.log("INSERT Title:", movie.movieTitle)
           console.log(
             "-----------------------------------------------------------------\n\n"
-          );
+          )
         })
       })
       top100Arr.forEach((movie, index) => {
@@ -248,21 +248,21 @@ function update() {
         `
         pool.query(selectListSql, (err, ret) => {
           if (err) {
-            console.log("[INSERT ERROR] - ", err.message);
-            return;
+            console.log("[INSERT ERROR] - ", err.message)
+            return
           }
           console.log(
             "--------------------------INSERT----------------------------"
-          );
-          console.log("INSERT URL:", "https://maoyan.com" + movie.movieLink);
-          console.log("INSERT Title:", movie.movieTitle);
+          )
+          console.log("INSERT URL:", "https://maoyan.com" + movie.movieLink)
+          console.log("INSERT Title:", movie.movieTitle)
           console.log(
             "-----------------------------------------------------------------\n\n"
-          );
+          )
         })
       })
     })
   })
 
-  miguMusicSpider();
+  miguMusicSpider()
 }
